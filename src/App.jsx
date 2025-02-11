@@ -1,44 +1,39 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import Search from './components/search/search';
-import Cat from './components/cat/Cat';
 
-function App() {
-// Steitai
-  const [cats, setsCats] = useState([]);
-  // cats - tuscias array kuri nustatysim su setsCats kaip gausim duomenis
-  // setsCats - ivedame duomenis(nustatome)
+import {useEffect, useState } from 'react';
+import SearchBar from './components/searchBar/searchBar';
+import WeatherDisplay from './components/weatherDisplay/WeatherDisplay';
 
-  const [search, setSearch] = useState(false)
+const App = () => {
+  const [city, setCity] = useState('');
+  const [weatherData, setWeatherData] = useState(null);
+  const API_KEY = 'f550001c4b42ed7332882ee5f95edb64'; 
 
-  const handleSearch = (data) => {
-    setSearch(data)
-  }
+  useEffect(() => {
+    if (city) {
+      const fetchData = async () => {
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`
+        );
+        const data = await response.json();
+        setWeatherData(data);
+      };
 
- useEffect(() =>{
-  if(search){
-    try {
-      fetch(`https://api.thecatapi.com/v1/images/search?breed_ids=${search}`)
-      .then(respone => respone.json())
-      .then(data => setsCats(data))
-    }catch (err) {
-      console.log('err', err)
+      fetchData();
     }
-  }
- },[search]) // <- isimetame search kad visada naudotu naujus duomenis.
+  }, [city]);
+
+  const handleSearch = (cityName) => {
+    setCity(cityName);
+  };
+
   return (
-    
-    <div className="container">
-      {/* Nusiunciu duomenis i search */}
-      <Search onSearch={handleSearch}/>
-      {cats?.map((cat) =>
-        <Cat key={cat.id} url={cat.url}/>
-  
-      )}
-    </div> 
+    <div>
+      <h1>Orų Prognozė</h1>
+      <SearchBar onSearch={handleSearch} />
+      {weatherData && <WeatherDisplay weather={weatherData} />}
+    </div>
+  );
+};
 
-  )
-  
-}
+export default App;
 
-export default App
